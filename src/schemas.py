@@ -25,7 +25,8 @@ class Entry(BaseModel):
     id: str = Field(description="Unique id, e.g. 'E1'")
     time: Optional[str] = Field(None, description="Time of the event if said, e.g. '14:00'")
     author: str = Field(description="Caregiver who dictated")
-    profession: Literal["nurse", "occupational_therapist", "doctor", "other"] = "nurse"
+    profession: Literal["nurse", "doctor", "occupational_therapist", "physiotherapist",
+                        "dietitian", "social_worker", "other"] = "nurse"
     domain: Optional[Domain] = Field(None, description="Which observation criterion this entry is about")
     type: Literal["observation", "intervention", "medication", "refusal", "instruction"]
     content: str = Field(description="What was said, faithfully, without interpretation")
