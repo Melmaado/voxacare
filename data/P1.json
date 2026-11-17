@@ -14,5 +14,39 @@
     }
   ],
   "instructions": [],
-  "entries": []
+  "entries": [
+    {
+      "id": "E1",
+      "time": "14:00",
+      "author": "Nurse A",
+      "type": "medication",
+      "content": "J'ai donné 5mg de morphine en sous-cutané",
+      "drug": "morphine",
+      "dose": "5mg",
+      "route": "sous-cutané",
+      "source_dictation": "D1"
+    },
+    {
+      "id": "E2",
+      "time": null,
+      "author": "Nurse A",
+      "type": "observation",
+      "content": "il avait mal à 7 sur 10",
+      "drug": null,
+      "dose": null,
+      "route": null,
+      "source_dictation": "D1"
+    },
+    {
+      "id": "E3",
+      "time": null,
+      "author": "Nurse A",
+      "type": "intervention",
+      "content": "J'ai aussi refait le pansement de la sternotomie, propre",
+      "drug": null,
+      "dose": null,
+      "route": null,
+      "source_dictation": "D1"
+    }
+  ]
 }
