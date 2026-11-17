@@ -20,8 +20,8 @@ class Entry(BaseModel):
     type: Literal["observation", "intervention", "medication", "refusal", "instruction"]
     content: str = Field(description="What was said, faithfully, without interpretation")
     drug: Optional[str] = Field(None, description="Only for medication or refusal")
-    dose: Optional[str] = Field(None, description="Only if said explicitely")
-    route: Optional[str] = Field(None, description="Only if said explicitely")
+    dose: Optional[str] = Field(None, description="Only if said explicitly")
+    route: Optional[str] = Field(None, description="Only if said explicitly")
     source_dictation: str = Field(description="Id of the original dictation, e.g. 'D1'")
 
 class PatientFile(BaseModel):
