@@ -17,11 +17,17 @@ huggingface_hub==2.4.0
 idna==3.20
 jsonpatch==1.47
 jsonpointer==3.12
+langchain==1.5.0
 langchain-core==1.8.1
 langchain-mistralai==1.2.0
 langchain-protocol==0.0.21
+langgraph==1.2.22
+langgraph-checkpoint==4.3.2
+langgraph-prebuilt==1.1.2
+langgraph-sdk==0.4.14
 langsmith==0.15.0
 orjson==3.13.0
+ormsgpack==1.13.1
 packaging==26.3
 pydantic==2.14.3
 pydantic_core==2.50.4
