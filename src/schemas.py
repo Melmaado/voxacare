@@ -8,15 +8,25 @@ class Treatment(BaseModel):
     frequency: Optional[str] = Field(None, description="e.g. 'every 4 hours if needed'")
 
 class Instruction(BaseModel):
+    id: str = Field("", description="Unique id, e.g. 'I1'")
     author: str = Field(description="Who gave the instruction, e.g. 'Dr.X'")
     date: str = Field(description="When it was given")
     text: str = Field(description="The instruction itself")
     status: Literal["open", "done"] = "open"
 
+Domain = Literal[
+    "collaboration", "behaviour", "slowness", "continence",
+    "eating_swallowing", "hygiene", "organisation",
+    "initiating_interactions", "activity_participation", "sociability",
+    "physical_health", "other",
+]
+
 class Entry(BaseModel):
     id: str = Field(description="Unique id, e.g. 'E1'")
     time: Optional[str] = Field(None, description="Time of the event if said, e.g. '14:00'")
     author: str = Field(description="Caregiver who dictated")
+    profession: Literal["nurse", "occupational_therapist", "doctor", "other"] = "nurse"
+    domain: Optional[Domain] = Field(None, description="Which observation criterion this entry is about")
     type: Literal["observation", "intervention", "medication", "refusal", "instruction"]
     content: str = Field(description="What was said, faithfully, without interpretation")
     drug: Optional[str] = Field(None, description="Only for medication or refusal")
@@ -31,6 +41,9 @@ class PatientFile(BaseModel):
     ward: str
     room: str
     reason_for_stay: str
+    diagnoses: list[str] = []
+    medical_history: list[str] = []
+    allergies: list[str] = []
     treatments: list[Treatment] = []
     instructions: list[Instruction] = []
     entries: list[Entry] = []
