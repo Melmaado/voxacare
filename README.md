@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/Voxacare_Full_Logo_Dark.png" width="380" alt="Voxacare"></p>
+<p align="center"><img src="assets/Voxacare_Full_Logo.png" width="380" alt="Voxacare"></p>
 
 # Voxacare
 
@@ -10,12 +10,13 @@ Voice-to-record assistant for hospital care teams. Caregivers dictate at the bed
 - **Patient file format**: Pydantic schema (treatments, instructions, entries, diagnoses, allergies, observation domains)
 - **Dictation → patient file**: Mistral extracts structured entries from a free-text dictation
 - **Doctor's questions**: an agent reads the files with tools and answers with citations, checked in code
+- **Footprint tracking**: every LLM call is logged with tokens, latency, cost and estimated gCO2e (EcoLogits). Baseline: ~0.007 gCO2e for one dictation and three questions.
 
 ## Planned
-- Observation domains for the whole care team (nursing, occupational therapy), designed with field caregivers
-- Draft occupational therapy report from the entries
+- Observation domains per ward (psychiatry first), designed with field caregivers, for the whole care team (nursing, OT, physiotherapy, dietetics, social work)
+- Per-patient summary sheet by observation domain, for multidisciplinary staff meetings (each professional writes their own report from it)
 - Rule-based checks (dose given twice, drug not prescribed, open instruction not followed)
-- Speech-to-text, CO2 tracking and benchmark
+- Speech-to-text, benchmark and measured CO2 reduction
 
 ## Run it
 ```bash
