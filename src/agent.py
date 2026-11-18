@@ -5,6 +5,8 @@ from langchain_mistralai import ChatMistralAI
 from storage import DATA_DIR, load_patient
 from pydantic import BaseModel, Field
 from langchain.agents.structured_output import ToolStrategy
+import tracker
+from config import PRICES
 
 load_dotenv()
 
@@ -79,7 +81,8 @@ agent = create_agent(model=llm, tools=[list_patients, read_patient_file],
                      system_prompt=SYSTEM_PROMPT, response_format=ToolStrategy(Answer))
 
 def ask(question: str) -> str:
-    result = agent.invoke({"messages": [{"role": "user", "content": question}]})
+    result = agent.invoke({"messages": [{"role": "user", "content": question}]},
+    config={"callbacks": [tracker.TokenTracker(PRICES, "agent-v3")], "tags": ["step:agent"]})
     for m in result["messages"]:
         for call in getattr(m,"tool_calls", None) or []:
             print(f"  -> tool: {call['name']}({call['args']})")

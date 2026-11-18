@@ -5,6 +5,8 @@ from langchain_mistralai import ChatMistralAI
 from pydantic import BaseModel, Field
 from schemas import PatientFile, Entry
 from storage import save_patient, load_patient
+import tracker
+from config import PRICES
 
 load_dotenv()
 
@@ -32,11 +34,11 @@ PROMPTS = {
 }
 
 llm = ChatMistralAI(model="mistral-small-latest", temperature=0)
-extract_chain = PROMPTS["extract-v1"] | llm.with_structured_output(Extraction)
+extract_chain = PROMPTS["extract-v1"] | llm.with_structured_output(Extraction).with_config(tags=["step:extract"])
 
-def run(chain, inputs):
-    # Single entry point for every LLM call: the tracker will be plugged in here later.
-    return chain.invoke(inputs)
+def run(chain, inputs, prompt_version="extract-v1"):
+    config = {"callbacks": [tracker.TokenTracker(PRICES, prompt_version)]}
+    return chain.invoke(inputs, config=config)
 
 def record_dictation(patient_id: str, dictation: str, author: str, dictation_id: str) -> PatientFile:
     patient = load_patient(patient_id)
