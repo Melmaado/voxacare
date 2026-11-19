@@ -1,5 +1,5 @@
 from typing import Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class Treatment(BaseModel):
     drug: str = Field(description="Active substance, e.g. 'morphine'")
@@ -22,12 +22,15 @@ Domain = Literal[
 ]
 
 class Entry(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     id: str = Field(description="Unique id, e.g. 'E1'")
     time: Optional[str] = Field(None, description="Time of the event if said, e.g. '14:00'")
     author: str = Field(description="Caregiver who dictated")
     profession: Literal["nurse", "doctor", "occupational_therapist", "physiotherapist",
                         "dietitian", "social_worker", "other"] = "nurse"
     domain: Optional[Domain] = Field(None, description="Which observation criterion this entry is about")
+    status: Literal["done", "planned"] = Field("done", description="done = it happened, planned = an intention")
+    date: Optional[str] = Field(None, description="Date of the dictation, ISO format, e.g. '2026-11-19'")
     type: Literal["observation", "intervention", "medication", "refusal", "instruction"]
     content: str = Field(description="What was said, faithfully, without interpretation")
     drug: Optional[str] = Field(None, description="Only for medication or refusal")
