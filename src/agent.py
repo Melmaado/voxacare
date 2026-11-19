@@ -89,6 +89,16 @@ def ask(patient_id: str, question: str) -> str:
         text += f"\n Invalid citations: {invalid} (not found in this patient's file)"
     return text
 
+def answer(patient_id: str, question: str) -> dict:
+    agent = make_agent(patient_id)
+    result = agent.invoke({"messages": [{"role": "user", "content": question}]},
+                          config={"callbacks": [tracker.TokenTracker(PRICES, "agent-v5")], "tags": ["step:agent"]})
+    r: Answer = result["structured_response"]
+    if not r.found:
+        return {"found": False, "answer": "Not recorded in the file.", "citations": [], "invalid_citations": []}
+    invalid = sorted(set(r.citations) - valid_ids(patient_id))
+    return {"found": True, "answer": r.answer, "citations": r.citations, "invalid_citations": invalid}
+
 if __name__ == "__main__":
     for patient_id, q in [("P1", "Est-ce que le patient a reçu de la morphine ? À quelle heure ?"),
                           ("P1", "Quel est son groupe sanguin ?"),
