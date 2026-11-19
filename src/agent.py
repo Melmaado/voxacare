@@ -15,7 +15,7 @@ class Answer(BaseModel):
                                     "(a prescription, an open instruction, an entry), even if what was asked "
                                     "is not recorded. False only if nothing in the files relates to the question.")
     answer: str = Field(description="The answer, at most 80 words. If not found: 'Not recorded in the file.'")
-    citations: list[str] = Field(default_factory=list, description="Ids of the entries, instructions, or treatments used, e.g. ['E1', 'I1']")
+    citations: list[str] = Field(default_factory=list, description="Ids copied exactly from the file (treatments, instructions, entries). Leave empty if nothing supports the answer.")
 
 @tool
 def list_patients() -> str:
@@ -28,7 +28,7 @@ def list_patients() -> str:
 
 @tool
 def read_patient_file(patient_id: str) -> str:
-    "Read the full file of one patient (treatments, instructions, entries). Each entry has an id like E1 to cite."
+    "Read the full file of one patient: treatments, instructions and entries, each with its id in square brackets."
     
     p = load_patient(patient_id)
     lines = [f"<patient_file id='{p.patient_id}'>",
@@ -67,7 +67,7 @@ def valid_ids() -> set[str]:
 SYSTEM_PROMPT = (
     "You help doctors and care teams find information in patient files. "
     "Always read the files with your tools before answering. "
-    "Answer only with facts from the files. Put the ids you used (e.g. E1, I1, T1) in the citations field. "
+    "Answer only with facts from the files. Put the ids you used, copied exactly from the file, in the citations field. "
     "Only cite ids that appear in the file. If nothing in the file supports the answer, cite nothing. "
     "When something is not in the file, say it is not recorded: do not conclude that it did not happen. "
     "A prescription is not an administration: only a medication entry shows that a drug was given. "
@@ -82,7 +82,7 @@ agent = create_agent(model=llm, tools=[list_patients, read_patient_file],
 
 def ask(question: str) -> str:
     result = agent.invoke({"messages": [{"role": "user", "content": question}]},
-    config={"callbacks": [tracker.TokenTracker(PRICES, "agent-v3")], "tags": ["step:agent"]})
+    config={"callbacks": [tracker.TokenTracker(PRICES, "agent-v4")], "tags": ["step:agent"]})
     for m in result["messages"]:
         for call in getattr(m,"tool_calls", None) or []:
             print(f"  -> tool: {call['name']}({call['args']})")
