@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voxacare</title>
+<link rel="icon" href="/assets/Voxacare_teal_white.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="brand" href="#" id="home-link" aria-label="Voxacare, accueil">
+      <img src="/assets/Voxacare_Full_Logo.png" alt="Voxacare">
+    </a>
+    <div class="who">
+      <label for="author">Qui dicte ?</label>
+      <input id="author" type="text" placeholder="Votre nom" autocomplete="name">
+      <select id="profession" aria-label="Profession"></select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Home: patient list -->
+  <section id="view-home">
+    <div class="page-title">
+      <h1>Patients</h1>
+      <span class="muted small">Données fictives, prototype</span>
+    </div>
+    <div id="home-status"></div>
+    <div class="patient-grid" id="patient-grid"></div>
+  </section>
+
+  <!-- Patient -->
+  <section id="view-patient" class="hidden">
+    <button class="btn btn-ghost back" id="back-btn">← Tous les patients</button>
+    <div class="patient-head">
+      <div>
+        <h1 id="p-name"></h1>
+        <div class="muted" id="p-meta"></div>
+      </div>
+      <div class="badges" id="p-badges"></div>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="dictate" role="tab">Dicter</button>
+      <button class="tab" data-tab="file" role="tab">Dossier</button>
+      <button class="tab" data-tab="ask" role="tab">Demander</button>
+    </nav>
+
+    <!-- Tab: dictate -->
+    <div id="tab-dictate">
+      <div class="card">
+        <h2>Nouvelle dictée</h2>
+        <textarea id="dictation" placeholder="Ex. : Mme S. a mangé seule ce midi. Elle a refusé la douche, je vais la lui reproposer après la sieste."></textarea>
+        <div class="row">
+          <button class="btn" id="extract-btn">Analyser</button>
+          <span class="muted small">L'analyse propose des entrées. Rien n'est enregistré avant votre validation.</span>
+        </div>
+        <div id="dictate-status"></div>
+      </div>
+
+      <div class="review hidden" id="review">
+        <div class="card">
+          <h2>Entrées proposées</h2>
+          <p class="muted small" style="margin-top:-6px">Vérifiez, corrigez ou supprimez chaque entrée, puis validez.</p>
+          <div class="review-list" id="review-list"></div>
+          <div class="row">
+            <button class="btn" id="save-btn">Valider et enregistrer</button>
+            <button class="btn btn-ghost" id="cancel-btn">Annuler</button>
+          </div>
+          <div id="save-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: file -->
+    <div id="tab-file" class="hidden">
+      <div id="file-status"></div>
+      <div class="summary" id="summary"></div>
+      <div class="page-title" style="margin-bottom:0">
+        <h2 style="margin:0">Entrées</h2>
+        <div class="view-toggle" role="group" aria-label="Affichage des entrées">
+          <button data-view="domain" class="active">Par domaine</button>
+          <button data-view="date">Par date</button>
+        </div>
+      </div>
+      <div id="entries"></div>
+    </div>
+
+    <!-- Tab: ask -->
+    <div id="tab-ask" class="hidden">
+      <div class="card">
+        <h2>Poser une question sur ce dossier</h2>
+        <form class="ask-form" id="ask-form">
+          <input id="question" type="text" placeholder="Ex. : Est-ce qu'elle a mangé aujourd'hui ?" autocomplete="off">
+          <button class="btn" id="ask-btn" type="submit">Demander</button>
+        </form>
+        <p class="muted small" style="margin-bottom:0">L'assistant répond uniquement à partir du dossier, et cite ses sources. Il ne pose pas de diagnostic.</p>
+        <div id="ask-status"></div>
+      </div>
+      <div class="qa" id="qa"></div>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

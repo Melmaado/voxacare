@@ -5,7 +5,8 @@ from agent import answer
 from extraction import ExtractedEvent, extract, save_entries
 from schemas import Entry, PatientFile, Profession
 from storage import init_db, list_patient_ids, load_patient
-
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 
 init_db()
 app = FastAPI(title="Voxacare API")
@@ -57,3 +58,7 @@ def add_entries(patient_id: str, body: EntriesIn) -> list[Entry]:
 def ask_question(patient_id: str, body: QuestionIn) -> dict:
     get_patient_or_404(patient_id)
     return answer(patient_id, body.question)
+
+ROOT = Path(__file__).parent.parent
+app.mount("/assets", StaticFiles(directory=ROOT / "assets"), name="assets")
+app.mount("/app", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")
