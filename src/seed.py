@@ -1,7 +1,8 @@
 from schemas import PatientFile, Instruction, Treatment
-from storage import save_patient
+from storage import save_patient, init_db
 
 def seed() -> None:
+    init_db()
     p1 = PatientFile(
         patient_id="P1", pseudonym="Mr. D.", age=67, ward="cardiology", room="12",
         reason_for_stay="Day 2 after cardiac surgery",

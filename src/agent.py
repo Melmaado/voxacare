@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_core.tools import tool
 from langchain_mistralai import ChatMistralAI
-from storage import DATA_DIR, load_patient
+from storage import list_patient_ids, load_patient
 from pydantic import BaseModel, Field
 from langchain.agents.structured_output import ToolStrategy
 import tracker
@@ -21,8 +21,8 @@ class Answer(BaseModel):
 def list_patients() -> str:
     "List the hospitalised patients: id, pseudonym, room, and reason for stay. Use it to find a patient's id."
     lines = []
-    for path in sorted(DATA_DIR.glob("*.json")):
-        p = load_patient(path.stem)
+    for patient_id in list_patient_ids():
+        p = load_patient(patient_id)
         lines.append(f"{p.patient_id}: {p.pseudonym}, {p.age} y, room {p.room}, {p.reason_for_stay}")
     return "\n".join(lines)
 
@@ -58,8 +58,8 @@ def read_patient_file(patient_id: str) -> str:
 
 def valid_ids() -> set[str]:
     ids = set()
-    for path in DATA_DIR.glob("*.json"):
-        p = load_patient(path.stem)
+    for patient_id in list_patient_ids():
+        p = load_patient(patient_id)
         ids |= {e.id for e in p.entries} | {i.id for i in p.instructions}
         ids |= {f"T{n}" for n in range(1, len(p.treatments) +1)}
     return ids
