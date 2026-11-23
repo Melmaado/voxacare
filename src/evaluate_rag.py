@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from rag import Retriever, load_pages
+import sys
 
 EVAL_PATH = Path(__file__).parent.parent / "data" / "eval" / "rag_qa.jsonl"
 
@@ -38,6 +39,16 @@ def show_ranks(search, items: list[dict], k: int = 4) -> None:
         rank = next((r for r, page in enumerate(found, start=1) if page in item["pages"]), None)
         print(f"  {item['id']}: rank={rank} got={found}")
 
+def check_unanswerable(items: list[dict], patient_id: str = "P4") -> None:
+    from agent import answer
+    for item in items:
+        result = answer(patient_id, item["question"])
+        ok = result["searched_guidelines"] and not result["sources"] and not result["invalid_citations"]
+        print(f"  {item['id']}: {'OK' if ok else 'FAIL'}  found={result['found']}  "
+              f"searched={result['searched_guidelines']}  sources={list(result['sources'])}")
+        print(f"    {result['answer']}")
+
+
 if __name__ == "__main__":
     items = load_items()
     check_anchors(items)
@@ -52,3 +63,6 @@ if __name__ == "__main__":
         if split == "dev":
             print(f"\n--- bm25 ranks with stopwords removed ({split}) ---")
             show_ranks(configs["stopwords"].lexical, answerable)
+    if "--agent" in sys.argv:
+        print("\n--- agent on unanswerable questions ---")
+        check_unanswerable([i for i in items if not i["pages"]])

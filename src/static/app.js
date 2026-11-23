@@ -345,7 +345,7 @@ $("#ask-form").addEventListener("submit", async (event) => {
     item.className = "card qa-item";
     item.innerHTML = `
       <div class="q">${esc(question)}</div>
-      <div class="a ${r.found ? "" : "not-found"}">${r.found ? esc(r.answer) : "Information non enregistrée dans le dossier."}</div>
+      <div class="a ${r.found ? "" : "not-found"}">${esc(r.answer)}</div>
       ${citationsHtml(r)}
       ${r.invalid_citations.length ? `<div class="notice error">Attention : citation introuvable (${esc(r.invalid_citations.join(", "))}). Vérifiez cette réponse.</div>` : ""}`;
     item.querySelectorAll("[data-ref]").forEach((chip) => chip.addEventListener("click", () => goToRef(chip.dataset.ref)));

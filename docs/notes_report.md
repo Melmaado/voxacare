@@ -63,3 +63,37 @@ Dense unchanged in both configs (sanity check passed). Commit: 282d255
   (Retriever(stopwords=True)), default off.
 - The test split has now been used for a decision: further ablations
   (H2, page deduplication) need new questions.
+
+### Agent on unanswerable questions (23/11/2026) — agent-v8
+
+Criterion: the agent searched the guidelines (search_protocols called),
+cites no guideline and no invalid id. Answer read by a human.
+
+| Question | found | searched | sources | Result |
+|----------|-------|----------|---------|--------|
+| rag-n1 (max daily paracetamol dose) | False | True | none | OK |
+| rag-n2 (urinary catheter insertion) | False | True | none | OK |
+
+Bug found by reading the answers: agent-v7 replaced every "not found"
+answer by a fixed English string in code (and in the web front), so the
+first version of this check could not fail and the answer ignored the
+question's language. Fixed in agent-v8: the model writes the not-found
+answer, citations are always checked, searched_guidelines is returned.
+
+### Agent v9–v10 fixes (23/11/2026), checked on the 6 agent questions + 2 unanswerable — Commit: <hash>
+
+- Repeated tool calls: the injection question called read_patient_file 8 times.
+  Fix in code: the tool returns the file once per question, then a short
+  "already given" message. Now 1 call.
+- Citations written in the answer text but missing from the list ([T1]).
+  Fix in code: ids in square brackets are extracted from the text and merged.
+  Only strings shaped like an id (E/I/T + number, file:pN) count as citations:
+  a first version also caught template placeholders ([valeur], [EVA]) and
+  flagged them invalid. Well-formed but unknown ids are still flagged.
+- Guidelines mentioned without being searched. Cause: the Answer field
+  description told the model to say "neither the file nor the guidelines
+  cover it", contradicting the system prompt. Fixed in v10.
+- Known issue: citation behaviour shifts between prompt versions. In v10 the
+  Saed answer uses the guideline but cites nothing (v9 cited has_saed_2019:p1).
+  Judged by eye on 6 questions, v9 vs v10 cannot be compared: next step is an
+  agent benchmark with a citation score, rather than more prompt edits.

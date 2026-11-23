@@ -11,6 +11,7 @@ from config import PRICES
 from functools import lru_cache
 from rag import Retriever
 from download_protocols import SOURCES
+import re
 
 SOURCE_URLS = {s["file"]: s["url"] for s in SOURCES}
 
@@ -21,7 +22,8 @@ class Answer(BaseModel):
                                     "to the question, even if what was asked is not recorded. "
                                     "False only if nothing relates to the question.")
     answer: str = Field(description="The answer, at most 120 words. Say first what the file records, then what the "
-                                    "guidelines say. If not found: 'Not recorded in the file.'")
+                                    "guidelines say. If nothing relevant was found, say so plainly, naming only the "
+                                    "sources you actually consulted.")
     citations: list[str] = Field(default_factory=list, description="Ids copied exactly from the patient file, and refs copied exactly from "
                                                                     "the excerpt tags of the guidelines. Leave empty if nothing supports the answer.")
 
@@ -70,7 +72,7 @@ def format_excerpts(docs) -> str:
         f"<excerpt ref='{guideline_ref(d)}' source='{d.metadata['title']} ({d.metadata['year']})'>\n"
         f"{d.page_content}\n</excerpt>" for d in docs)
 
-PROMPT_VERSION = "agent-v7"
+PROMPT_VERSION = "agent-v10"
 
 SYSTEM_PROMPT = (
     "You help the care team of the current patient. You have two tools. "
@@ -78,7 +80,8 @@ SYSTEM_PROMPT = (
     "search_protocols gives excerpts of public care guidelines (French national recommendations, HAS and INRS): "
     "use it when the question asks what to do, what to watch for, or what good practice is. "
     "In your answer, keep the two apart: first what the file records, then what the guidelines say. "
-    "Mention the guidelines only if you searched them with search_protocols in this answer. "
+    "If you did not call search_protocols for this question, say nothing about guidelines, protocols or "
+    "recommendations, not even that they are irrelevant or do not cover it. "
     "Guidelines are general references, not this hospital's rules and not an order for this patient. "
     "Answer only with facts from the file and the excerpts. Cite the ids copied exactly from the file and the refs "
     "copied exactly from the excerpt tags. Only cite what appears in them. If nothing supports the answer, cite nothing. "
@@ -93,10 +96,14 @@ llm = ChatMistralAI(model="mistral-small-latest", temperature=0)
 
 def make_agent(patient_id: str):
     retrieved: dict[str, dict] = {}
+    file_read = {"done": False}
 
     @tool
     def read_patient_file() -> str:
         "Read the full file of the current patient: treatments, instructions and entries, each with its id in square brackets."
+        if file_read["done"]:
+            return "The patient file was already given above. Use it; do not call this tool again."
+        file_read["done"] = True
         return format_patient_file(load_patient(patient_id))
 
     @tool
@@ -118,6 +125,15 @@ def make_agent(patient_id: str):
 def normalize_citation(c: str) -> str:
     return c.strip().strip("[]").strip()
 
+REF_SHAPE = r"[EIT]\d+|[\w-]+:p\d+"
+INLINE_REF = re.compile(rf"\[\s*({REF_SHAPE})\s*\]")
+
+def inline_refs(text: str) -> list[str]:
+    return INLINE_REF.findall(text)
+
+def looks_like_ref(c: str) -> bool:
+    return re.fullmatch(REF_SHAPE, c) is not None
+
 def answer(patient_id: str, question: str, verbose: bool = False) -> dict:
     agent, retrieved = make_agent(patient_id)
     result = agent.invoke({"messages": [{"role": "user", "content": question}]},
@@ -127,14 +143,13 @@ def answer(patient_id: str, question: str, verbose: bool = False) -> dict:
             for call in getattr(m, "tool_calls", None) or []:
                 print(f"  -> tool: {call['name']}({call['args']})")
     r: Answer = result["structured_response"]
-    if not r.found:
-        return {"found": False, "answer": "Not recorded in the file.", "citations": [],
-                "invalid_citations": [], "sources": {}}
-    citations = list(dict.fromkeys(normalize_citation(c) for c in r.citations))
+    candidates = (normalize_citation(c) for c in r.citations + inline_refs(r.answer))
+    citations = list(dict.fromkeys(c for c in candidates if looks_like_ref(c)))
     invalid = sorted(set(citations) - valid_ids(patient_id) - set(retrieved))
     sources = {ref: retrieved[ref] for ref in citations if ref in retrieved}
-    return {"found": True, "answer": r.answer, "citations": citations,
-            "invalid_citations": invalid, "sources": sources}
+    return {"found": r.found, "answer": r.answer, "citations": citations,
+            "invalid_citations": invalid, "sources": sources,
+            "searched_guidelines": bool(retrieved)}
 
 def ask(patient_id: str, question: str) -> str:
     r = answer(patient_id, question, verbose=True)
