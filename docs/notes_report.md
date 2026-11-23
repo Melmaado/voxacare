@@ -52,7 +52,7 @@ Hypotheses before ablation:
 | Baseline | 0.40 | 0.75 | 0.86 | 0.62 | 0.90 |
 | Stopwords removed | 0.56 | 0.75 | 1.00 | 0.57 | 0.79 |
 
-Dense unchanged in both configs (sanity check passed).
+Dense unchanged in both configs (sanity check passed). Commit: 282d255
 
 - H1 on dev: confirmed for BM25 (rag-01 4→2, rag-05 3→1); rag-04 recovered
   only at rank 4 (vocabulary mismatch remains); rag-06 regressed 1→2.
