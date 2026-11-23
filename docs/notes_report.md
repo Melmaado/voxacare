@@ -1,0 +1,20 @@
+## RAG retrieval — baseline (23/11/2026)
+
+Setup: 10 French guidelines (HAS, INRS), 55 pages, 264 chunks
+(1000 chars, overlap 150). Embeddings: mistral-embed. Lexical: BM25Okapi
+(no stopword removal). Hybrid: Reciprocal Rank Fusion (c=60, 20 candidates each).
+Benchmark: data/eval/rag_qa.jsonl, 13 questions (dev 5, test 8), of which
+2 unanswerable. Ground truth = expected pages, each checked by an exact
+anchor sentence in the cleaned page text (check_anchors).
+Metrics: hit@4 and MRR over answerable questions. Commit: d747a77
+
+| Method | dev hit@4 | dev MRR | test hit@4 | test MRR |
+|--------|-----------|---------|------------|----------|
+| Dense  | 1.00      | 0.75    | 1.00       | 0.90     |
+| BM25   | 0.75      | 0.40    | 0.86       | 0.62     |
+| Hybrid | 1.00      | 0.75    | 1.00       | 0.90     |
+
+Notes: n is small (4 dev / 7 test answerable), so one question = 0.25 / 0.14.
+Hybrid does not degrade dense but no difference can be claimed.
+Dense hit@4 is at ceiling: questions likely reuse the guidelines' wording;
+add field-style paraphrases later.
