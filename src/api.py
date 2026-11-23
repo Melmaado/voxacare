@@ -4,15 +4,16 @@ from pydantic import BaseModel
 from agent import answer
 from extraction import ExtractedEvent, extract, save_entries
 from schemas import Entry, PatientFile, Profession
-from storage import init_db, list_patient_ids, load_patient
+from storage import list_patient_ids, load_patient
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 import logging
 import httpx
 from pydantic import ValidationError
 from langchain_core.exceptions import OutputParserException
+from migrate import migrate
 
-init_db()
+migrate()
 app = FastAPI(title="Voxacare API")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("voxacare")

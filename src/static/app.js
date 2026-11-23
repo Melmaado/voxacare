@@ -270,7 +270,7 @@ function renderFile() {
                            : `<p class="muted small" style="margin:0">Aucune allergie enregistrée</p>`}
       <h3 style="margin-top:14px">Traitements prescrits</h3>
       ${listOrNone(p.treatments.map((t, i) =>
-        `<li id="ref-T${i + 1}"><span class="chip id">T${i + 1}</span> ${esc(t.drug)} ${esc(t.dose)} ${esc(t.route || "")} <span class="muted">${esc(t.frequency || "")}</span></li>`))}
+        `<li id="ref-${esc(t.id)}"><span class="chip id">${esc(t.id)}</span> ${esc(t.drug)} ${esc(t.dose)} ${esc(t.route || "")} <span class="muted">${esc(t.frequency || "")}</span></li>`))}
     </div>
     <div class="card">
       <h3>Consignes</h3>

@@ -35,8 +35,8 @@ def format_patient_file(p: PatientFile) -> str:
              f"Medical history: {', '.join(p.medical_history) or 'none recorded'}",
              f"Allergies: {', '.join(p.allergies) or 'none recorded'}",
              "Prescribed treatments (what is ordered, NOT proof that it was given):"]
-    for n, t in enumerate(p.treatments, start=1):
-        lines.append(f"- [T{n}] {t.drug} {t.dose} {t.route or ''} {t.frequency or ''}")
+    for t in p.treatments:
+        lines.append(f"- [{t.id}] {t.drug} {t.dose} {t.route or ''} {t.frequency or ''}")
     
     lines.append("Instructions:")
     for i in p.instructions:
@@ -57,7 +57,7 @@ def format_patient_file(p: PatientFile) -> str:
 def valid_ids(patient_id: str) -> set[str]:
     p = load_patient(patient_id)
     ids = {e.id for e in p.entries} | {i.id for i in p.instructions}
-    ids |= {f"T{n}" for n in range(1, len(p.treatments) +1)}
+    ids |= {t.id for t in p.treatments}
     return ids
 
 @lru_cache(maxsize=1)
