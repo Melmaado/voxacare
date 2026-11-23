@@ -32,6 +32,12 @@ def metrics(search, items: list[dict], k: int = 4) -> dict:
         rr.append(1 / ranks[0] if ranks else 0)
     return {f"hit@{k}": round(sum(hits) / len(hits), 2), "MRR": round(sum(rr) / len(rr), 2), "n": len(items)}
 
+def show_ranks(search, items: list[dict], k: int = 4) -> None:
+    for item in items:
+        found = [ref(d) for d in search(item["question"], k)]
+        rank = next((r for r, page in enumerate(found, start=1) if page in item["pages"]), None)
+        print(f"  {item['id']}: rank={rank} got={found}")
+
 if __name__ == "__main__":
     items = load_items()
     check_anchors(items)
@@ -42,3 +48,6 @@ if __name__ == "__main__":
         print("dense :", metrics(retriever.dense, answerable))
         print("bm25 :", metrics(retriever.lexical, answerable))
         print("hybrid :", metrics(lambda q, k: retriever.hybrid(q, k=k), answerable))
+
+    print("\n--- bm25 errors (dev) ---")
+    show_ranks(retriever.lexical, [i for i in items if i["split"] == "dev" and i["pages"]])

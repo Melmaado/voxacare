@@ -18,3 +18,30 @@ Notes: n is small (4 dev / 7 test answerable), so one question = 0.25 / 0.14.
 Hybrid does not degrade dense but no difference can be claimed.
 Dense hit@4 is at ceiling: questions likely reuse the guidelines' wording;
 add field-style paraphrases later.
+
+### Error analysis — BM25 on dev (23/11/2026)
+
+| Question | Rank | Retrieved instead |
+|----------|------|-------------------|
+| rag-01 (warning signs of choking) | 4 | fausses_routes p1, p2 first |
+| rag-04 (drugs that raise choking risk) | miss | neuroleptiques p2, fausses_routes p1/p2 |
+| rag-05 (exercises against falls) | 3 | chutes p4, p6 first |
+| rag-06 (preparing for aggressive moments) | 1 | — |
+
+Findings:
+- Main failure is vocabulary mismatch, not stopwords: rag-04 asks for
+  "médicaments", the answer page says "benzodiazépines". BM25 only matches
+  identical tokens; dense retrieval bridges the gap through embeddings.
+- Within-document confusion: "fausse route" appears on every page of the
+  guideline (p1: 3, p2: 4, p3: 2 occurrences). BM25 rewards term frequency,
+  so the answer page (p3) is the one it ranks lowest (rag-01).
+- Duplicate pages in the top k: several chunks of the same page can fill
+  two of the 4 slots (fausses_routes p2 in rag-04, violence p2 in rag-06).
+  hit@4 therefore counts chunks, not pages, and the agent receives the
+  same source twice (wasted context).
+
+Hypotheses before ablation:
+- H1: removing French stopwords improves BM25 ranks (rag-01, rag-05)
+  but does not fix rag-04.
+- H2: deduplicating results by page frees slots and may raise hit@4/MRR.
+
