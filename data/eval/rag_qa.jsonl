@@ -1,0 +1,13 @@
+{"id": "rag-01", "split": "dev", "question": "Quels signes d'alerte de fausse route faut-il surveiller pendant un repas ?", "anchor": "voix mouillée", "pages": ["has_fausses_routes_2026:p3"]}
+{"id": "rag-02", "split": "test", "question": "Comment structurer un appel au médecin pour un patient qui s'aggrave ?", "anchor": "Saed", "pages": ["has_saed_2019:p1"]}
+{"id": "rag-03", "split": "test", "question": "Quels effets indésirables digestifs surveiller chez un patient sous neuroleptique ?", "anchor": "constipation", "pages": ["has_neuroleptiques_2022:p1", "has_neuroleptiques_2022:p2", "has_neuroleptiques_2022:p3"]}
+{"id": "rag-04", "split": "dev", "question": "Quels médicaments augmentent le risque qu'un patient fasse une fausse route ?", "anchor": "benzodiazépines", "pages": ["has_fausses_routes_2026:p3"]}
+{"id": "rag-05", "split": "dev", "question": "Quels exercices proposer à une personne âgée pour qu'elle tombe moins ?", "anchor": "exercices d’équilibre", "pages": ["has_chutes_synthese_2024:p9", "has_chutes_synthese_2024:p10"]}
+{"id": "rag-06", "split": "dev", "question": "Comment préparer avec le patient la gestion de ses moments d'agressivité ?", "anchor": "stratégies d’apaisement", "pages": ["has_violence_plan_prevention_2016:p2", "has_violence_plan_prevention_2016:p3"]}
+{"id": "rag-07", "split": "test", "question": "À partir de quel poids ou de quel IMC considère-t-on qu'un patient de plus de 70 ans est dénutri ?", "anchor": "IMC < 22", "pages": ["has_denutrition_fiche_2021:p4"]}
+{"id": "rag-08", "split": "test", "question": "À quels moments faut-il se désinfecter les mains pendant les soins ?", "anchor": "cinq circonstances", "pages": ["inrs_precautions_standard_2017:p2"]}
+{"id": "rag-09", "split": "test", "question": "Une infirmière peut-elle recopier elle-même une prescription sur la feuille de soins ?", "anchor": "non habilités", "pages": ["has_transcription_prescriptions_2026:p2"]}
+{"id": "rag-10", "split": "test", "question": "Au bout de combien d'heures faut-il renouveler la décision de mise en chambre d'isolement ?", "anchor": "renouvelées dans les 12 heures", "pages": ["has_isolement_synthese_2017:p1", "has_isolement_synthese_2017:p3"]}
+{"id": "rag-11", "split": "test", "question": "Combien de fois par jour un médecin doit-il voir un patient sous contention ?", "anchor": "deux visites médicales", "pages": ["has_contention_synthese_2017:p2", "has_contention_synthese_2017:p3", "has_contention_synthese_2017:p4"]}
+{"id": "rag-n1", "split": "test", "question": "Quelle est la dose maximale de paracétamol par jour ?", "anchor": null, "pages": []}
+{"id": "rag-n2", "split": "dev", "question": "Comment poser une sonde urinaire chez un homme ?", "anchor": null, "pages": []}
