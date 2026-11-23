@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ src/
 COPY assets/ assets/
+COPY migrations/ migrations/
 
 EXPOSE 8000
 
