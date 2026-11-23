@@ -20,6 +20,13 @@ COMMON_WORDS = {
     "es": {"de", "la", "que", "el", "en", "y", "a", "los", "del", "se", "las", "por", "un", "para"},
 }
 
+FRENCH_STOPWORDS = frozenset("""
+a à au aux avec ce ces cet cette c d dans de des du elle elles en est et
+être il ils j je l la le les leur leurs lui m ma mais me mes moi mon n ne
+nous on ou où par pas pour qu que qui s sa se ses son sont sur t ta te
+tes toi ton tu un une vos votre vous y
+""".split())
+
 def readable(text: str, lang: str) -> bool:
     words = re.findall(r"\w+", text.lower())
     if not words:
@@ -87,11 +94,12 @@ def build_index(chunks: list[Document]) -> InMemoryVectorStore:
 
 TOKEN = re.compile(r"\w+")
 
-def tokenize(text: str) -> list[str]:
-    return TOKEN.findall(text.lower())
+def tokenize(text: str, drop: frozenset = frozenset()) -> list[str]:
+    return [t for t in TOKEN.findall(text.lower()) if t not in drop]
 
 class Retriever:
-    def __init__(self):
+    def __init__(self, stopwords: bool = False):
+        self.drop = FRENCH_STOPWORDS if stopwords else frozenset()
         self.chunks = split(load_pages())
         self.store = build_index(self.chunks)
         self.bm25 = BM25Okapi([tokenize(c.page_content) for c in self.chunks])
@@ -100,7 +108,7 @@ class Retriever:
         return self.store.similarity_search(question, k=k)
     
     def lexical(self, question: str, k: int) -> list[Document]:
-        scores = self.bm25.get_scores(tokenize(question))
+        scores = self.bm25.get_scores(tokenize(question, self.drop))
         best = sorted(range(len(self.chunks)), key=lambda i: scores[i], reverse=True)[:k]
         return [self.chunks[i] for i in best]
 

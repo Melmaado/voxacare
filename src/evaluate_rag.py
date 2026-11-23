@@ -41,13 +41,14 @@ def show_ranks(search, items: list[dict], k: int = 4) -> None:
 if __name__ == "__main__":
     items = load_items()
     check_anchors(items)
-    retriever = Retriever()
+    configs = {"baseline": Retriever(), "stopwords": Retriever(stopwords=True)}
     for split in ("dev", "test"):
         answerable = [i for i in items if i["split"] == split and i["pages"]]
         print(f"\n--- {split} ({len(answerable)} answerable questions) ---")
-        print("dense :", metrics(retriever.dense, answerable))
-        print("bm25 :", metrics(retriever.lexical, answerable))
-        print("hybrid :", metrics(lambda q, k: retriever.hybrid(q, k=k), answerable))
-
-    print("\n--- bm25 errors (dev) ---")
-    show_ranks(retriever.lexical, [i for i in items if i["split"] == "dev" and i["pages"]])
+        for name, retriever in configs.items():
+            print(f"{name:9} dense :", metrics(retriever.dense, answerable))
+            print(f"{name:9} bm25  :", metrics(retriever.lexical, answerable))
+            print(f"{name:9} hybrid:", metrics(lambda q, k, r=retriever: r.hybrid(q, k=k), answerable))
+        if split == "dev":
+            print(f"\n--- bm25 ranks with stopwords removed ({split}) ---")
+            show_ranks(configs["stopwords"].lexical, answerable)

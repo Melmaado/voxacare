@@ -45,3 +45,21 @@ Hypotheses before ablation:
   but does not fix rag-04.
 - H2: deduplicating results by page frees slots and may raise hit@4/MRR.
 
+### Ablation — French stopword removal in BM25 (23/11/2026)
+
+| Config | dev BM25 MRR | dev hybrid MRR | test BM25 hit@4 | test BM25 MRR | test hybrid MRR |
+|--------|--------------|----------------|-----------------|---------------|-----------------|
+| Baseline | 0.40 | 0.75 | 0.86 | 0.62 | 0.90 |
+| Stopwords removed | 0.56 | 0.75 | 1.00 | 0.57 | 0.79 |
+
+Dense unchanged in both configs (sanity check passed).
+
+- H1 on dev: confirmed for BM25 (rag-01 4→2, rag-05 3→1); rag-04 recovered
+  only at rank 4 (vocabulary mismatch remains); rag-06 regressed 1→2.
+- Dev showed no gain for hybrid retrieval, the system the agent uses.
+- Test: BM25 finds more pages (hit@4 0.86→1.00) but ranks them lower
+  (MRR 0.62→0.57); hybrid MRR drops 0.90→0.79 (≈ one question, n=7).
+- Decision: not deployed. Stopword removal stays an option
+  (Retriever(stopwords=True)), default off.
+- The test split has now been used for a decision: further ablations
+  (H2, page deduplication) need new questions.
