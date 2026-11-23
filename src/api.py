@@ -22,6 +22,7 @@ class DictationIn(BaseModel):
     dictation:str
 
 class EntriesIn(BaseModel):
+    dictation: str
     events: list[ExtractedEvent]
     author: str
     profession: Profession
@@ -74,7 +75,7 @@ def extract_dictation(patient_id: str, body: DictationIn) -> list[ExtractedEvent
 @app.post("/patients/{patient_id}/entries")
 def add_entries(patient_id: str, body: EntriesIn) -> list[Entry]:
     get_patient_or_404(patient_id)
-    return save_entries(patient_id, body.events, body.author, body.profession, body.dictation_date)
+    return save_entries(patient_id, body.dictation, body.events, body.author, body.profession, body.dictation_date)
 
 @app.post("/patients/{patient_id}/ask")
 def ask_question(patient_id: str, body: QuestionIn) -> dict:

@@ -4,7 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_mistralai import ChatMistralAI
 from pydantic import BaseModel, Field
 from schemas import PatientFile, Entry, Domain
-from storage import save_patient, load_patient
+from storage import get_connection, load_patient, medicine_id, staff_id
 import tracker
 from config import PRICES
 from datetime import date
@@ -52,26 +52,29 @@ def extract(dictation: str) -> list[ExtractedEvent]:
     "LLM step: turn a dictation into events. Nothing is saved."
     return run(extract_chain, {"dictation": dictation}, prompt_version="extract-v2").events
 
-def save_entries(patient_id: str, events: list[ExtractedEvent], author: str,
+def save_entries(patient_id: str, dictation: str, events: list[ExtractedEvent], author: str,
                  profession: str, dictation_date: Optional[str] = None) -> list[Entry]:
-    "Code step, after the caregiver has validated the events: add what the code knows, then save."
-    patient = load_patient(patient_id)
-    dictation_id = f"D{len({e.source_dictation for e in patient.entries}) + 1}"
-    entries = []
-    for event in events:
-        entry = Entry(            
-            id=f"E{len(patient.entries)+1}", author=author, profession=profession,
-            date=dictation_date or date.today().isoformat(), source_dictation=dictation_id,
-            **event.model_dump()
-        )
-        patient.entries.append(entry)
-        entries.append(entry)
-    save_patient(patient)
-    return entries
+    "Code step, after the caregiver has validated the events: save the dictation, then one entry per event."
+    with get_connection() as co:
+        author_id = staff_id(co, author, profession)
+        dictation_id = co.execute(
+            """INSERT INTO dictations (patient_id, author_id, text) VALUES (%s,%s,%s)
+               RETURNING dictation_id""", (patient_id, author_id, dictation)).fetchone()["dictation_id"]
+        for event in events:
+            co.execute(
+                """INSERT INTO entries (patient_id, dictation_id, author_id, profession, type, domain, status,
+                                        event_date, event_time, content, medicine_id, dose, route)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (patient_id, dictation_id, author_id, profession, event.type, event.domain, event.status,
+                 dictation_date or date.today().isoformat(), event.time, event.content,
+                 medicine_id(co, event.drug) if event.drug else None, event.dose, event.route))
+    source = f"D{dictation_id}"
+    return [e for e in load_patient(patient_id).entries if e.source_dictation == source]
+
 
 def record_dictation(patient_id: str, dictation: str, author: str, profession: str) -> list[Entry]:
     "Both steps at once, without validation: only for scripts and tests."
-    return save_entries(patient_id, extract(dictation), author, profession)
+    return save_entries(patient_id, dictation, extract(dictation), author, profession)
 
 if __name__ == "__main__":
     tests = [

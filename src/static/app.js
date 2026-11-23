@@ -57,7 +57,7 @@ function store(key, value) { try { sessionStorage.setItem(key, value); } catch (
 function recall(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } }
 
 // ---------- State ----------
-const state = { patientId: null, patient: null, events: [], view: "domain" };
+const state = { patientId: null, patient: null, events: [], dictation: "", view: "domain" };
 
 // ---------- Who is dictating ----------
 const authorInput = $("#author");
@@ -109,6 +109,7 @@ async function showHome() {
 async function openPatient(patientId) {
   state.patientId = patientId;
   state.events = [];
+  state.dictation = "";
   $("#view-home").classList.add("hidden");
   $("#view-patient").classList.remove("hidden");
   $("#dictation").value = "";
@@ -146,6 +147,7 @@ document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () 
 // ---------- Dictate: extract, review, save ----------
 $("#extract-btn").addEventListener("click", async () => {
   const dictation = $("#dictation").value.trim();
+  state.dictation = dictation;
   const status = $("#dictate-status");
   notice($("#save-status"), "", "");
   if (dictation.length < 10) {
@@ -228,7 +230,7 @@ $("#save-btn").addEventListener("click", async () => {
   setLoading(btn, true, "Enregistrement…");
   try {
     const saved = await api(`/patients/${encodeURIComponent(state.patientId)}/entries`, {
-      events: state.events, author, profession: professionSelect.value,
+      dictation: state.dictation, events: state.events, author, profession: professionSelect.value,
     });
     state.events = [];
     $("#review").classList.add("hidden");
@@ -269,7 +271,7 @@ function renderFile() {
       ${p.allergies.length ? `<div class="badges">${p.allergies.map((a) => `<span class="chip red">${esc(a)}</span>`).join("")}</div>`
                            : `<p class="muted small" style="margin:0">Aucune allergie enregistrée</p>`}
       <h3 style="margin-top:14px">Traitements prescrits</h3>
-      ${listOrNone(p.treatments.map((t, i) =>
+      ${listOrNone(p.treatments.map((t) =>
         `<li id="ref-${esc(t.id)}"><span class="chip id">${esc(t.id)}</span> ${esc(t.drug)} ${esc(t.dose)} ${esc(t.route || "")} <span class="muted">${esc(t.frequency || "")}</span></li>`))}
     </div>
     <div class="card">
