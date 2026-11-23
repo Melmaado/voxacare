@@ -8,7 +8,7 @@ def migrate() -> None:
         co.execute("""CREATE TABLE IF NOT EXISTS schema_migrations (
                             name TEXT PRIMARY KEY,
                             applied_at TIMESTAMPTZ NOT NULL DEFAULT now())""")
-        applied = {row[0] for row in co.execute("SELECT name FROM schema_migrations")}
+        applied = {row["name"] for row in co.execute("SELECT name FROM schema_migrations")}
         for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
             if path.name in applied:
                 continue

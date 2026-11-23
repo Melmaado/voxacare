@@ -2,6 +2,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 class Treatment(BaseModel):
+    id: str = Field("", description="Stable id from the database, e.g. 'T7'")
     drug: str = Field(description="Active substance, e.g. 'morphine'")
     dose: str = Field(description="Dose with unit, e.g. '5 mg'")
     route: Optional[str] = Field(None, description="SC, IV, oral...")
