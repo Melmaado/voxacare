@@ -346,9 +346,8 @@ $("#ask-form").addEventListener("submit", async (event) => {
     item.innerHTML = `
       <div class="q">${esc(question)}</div>
       <div class="a ${r.found ? "" : "not-found"}">${r.found ? esc(r.answer) : "Information non enregistrée dans le dossier."}</div>
-      ${r.citations.length ? `<div class="citations"><span class="muted small">Sources :</span>
-        ${r.citations.map((c) => `<button class="chip id" data-ref="${esc(c)}" title="Voir dans le dossier">${esc(c)}</button>`).join("")}</div>` : ""}
-      ${r.invalid_citations.length ? `<div class="notice error">Attention : citation introuvable dans le dossier (${esc(r.invalid_citations.join(", "))}). Vérifiez cette réponse.</div>` : ""}`;
+      ${citationsHtml(r)}
+      ${r.invalid_citations.length ? `<div class="notice error">Attention : citation introuvable (${esc(r.invalid_citations.join(", "))}). Vérifiez cette réponse.</div>` : ""}`;
     item.querySelectorAll("[data-ref]").forEach((chip) => chip.addEventListener("click", () => goToRef(chip.dataset.ref)));
     $("#qa").prepend(item);
     $("#question").value = "";
@@ -358,6 +357,25 @@ $("#ask-form").addEventListener("submit", async (event) => {
     setLoading(btn, false, "Demander");
   }
 });
+
+// Citations: ids of the patient file (click: highlight in the file tab) and guideline refs (link to the PDF page).
+function citationsHtml(r) {
+  const sources = r.sources || {};
+  const fileIds = r.citations.filter((c) => !(c in sources) && !r.invalid_citations.includes(c));
+  const guides = r.citations.filter((c) => c in sources);
+  const fileRow = fileIds.length ? `<div class="citations"><span class="muted small">Dossier :</span>
+    ${fileIds.map((c) => `<button class="chip id" data-ref="${esc(c)}" title="Voir dans le dossier">${esc(c)}</button>`).join("")}</div>` : "";
+  const guideRow = guides.length ? `<div class="citations"><span class="muted small">Recommandations :</span>
+    ${guides.map((c) => {
+      const s = sources[c];
+      const label = `${String(s.title).replace(/^[A-Z]+\s*–\s*/, "")}, p. ${s.page}`;
+      const url = typeof s.url === "string" && s.url.startsWith("https://") ? `${s.url}#page=${Number(s.page)}` : null;
+      return url
+        ? `<a class="chip guide" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(s.title)}">${esc(label)} ↗</a>`
+        : `<span class="chip guide" title="${esc(s.title)}">${esc(label)}</span>`;
+    }).join("")}</div>` : "";
+  return fileRow + guideRow;
+}
 
 // Open the file tab and highlight the cited entry, instruction or treatment.
 function goToRef(ref) {

@@ -24,6 +24,7 @@ services:
       - "8000:8000"
     volumes:
       - ./logs:/app/logs
+      - ./data/protocols:/app/data/protocols
     depends_on:
       db:
         condition: service_healthy

@@ -10,6 +10,9 @@ import tracker
 from config import PRICES
 from functools import lru_cache
 from rag import Retriever
+from download_protocols import SOURCES
+
+SOURCE_URLS = {s["file"]: s["url"] for s in SOURCES}
 
 load_dotenv()
 
@@ -104,7 +107,8 @@ def make_agent(patient_id: str):
         restraint in psychiatry. Returns excerpts, each with a ref to cite."""
         docs = get_retriever().hybrid(query, k=4)
         for d in docs:
-            retrieved[guideline_ref(d)] = {"title": d.metadata["title"], "page": d.metadata["page"]}
+            retrieved[guideline_ref(d)] = {"title": d.metadata["title"], "page": d.metadata["page"],
+                                           "url": SOURCE_URLS.get(d.metadata["file"])}
         return format_excerpts(docs)
 
     agent = create_agent(model=llm, tools=[read_patient_file, search_protocols],
