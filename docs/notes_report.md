@@ -80,7 +80,7 @@ first version of this check could not fail and the answer ignored the
 question's language. Fixed in agent-v8: the model writes the not-found
 answer, citations are always checked, searched_guidelines is returned.
 
-### Agent v9–v10 fixes (23/11/2026), checked on the 6 agent questions + 2 unanswerable — Commit: <hash>
+### Agent v9–v10 fixes (23/11/2026), checked on the 6 agent questions + 2 unanswerable — Commit: c9ec31a
 
 - Repeated tool calls: the injection question called read_patient_file 8 times.
   Fix in code: the tool returns the file once per question, then a short
