@@ -97,3 +97,22 @@ answer, citations are always checked, searched_guidelines is returned.
   Saed answer uses the guideline but cites nothing (v9 cited has_saed_2019:p1).
   Judged by eye on 6 questions, v9 vs v10 cannot be compared: next step is an
   agent benchmark with a citation score, rather than more prompt edits.
+
+## Normalized database (23/11/2026) — teacher feedback on the JSONB store
+
+Before: one JSONB document per patient, rewritten in full at every save;
+ids computed by position (T1 = first treatment in the list).
+After: 10 tables (migrations/001_schema.sql), applied by src/migrate.py
+(each migration once, in a transaction, tracked in schema_migrations).
+
+- Stable ids from SERIAL keys (T7, E12): a citation always points to the same row.
+- Entries are append-only: a trigger rejects UPDATE and DELETE on entries
+  (checked: "ERROR: entries are append-only"); corrections are new entries
+  with supersedes. load_patient() shows only the latest version.
+- Each entry links to its dictation (raw text kept) and its author (staff).
+- profession is copied into each entry on purpose: the profession at the
+  time of writing is a fact of the entry (denormalization, justified).
+- A dictation and its entries are saved in one transaction.
+- load_patient() rebuilds the same PatientFile from joins: agent, API and
+  front did not change. Non-regression: agent questions give the same
+  answers, with database ids.
